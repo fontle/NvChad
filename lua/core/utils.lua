@@ -88,8 +88,8 @@ M.load_mappings = function(mappings, mapping_opt)
     end
   end
 
-  mappings = mappings or vim.deepcopy(M.load_config().mappings)
-  mappings.lspconfig = nil
+  local mappings_tb = M.load_config().mappings
+  mappings = vim.deepcopy(type(mappings) == "string" and { mappings_tb[mappings] } or mappings_tb)
 
   for name, section in pairs(mappings) do
     -- skip mapping section with plugin=true

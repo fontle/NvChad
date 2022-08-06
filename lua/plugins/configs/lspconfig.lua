@@ -8,7 +8,6 @@ require("base46").load_highlight "lsp"
 require "nvchad_ui.lsp"
 
 local M = {}
-local utils = require "core.utils"
 
 -- export on_attach & capabilities for custom lspconfigs
 
@@ -23,8 +22,7 @@ M.on_attach = function(client, bufnr)
     client.resolved_capabilities.document_range_formatting = false
   end
 
-  local lsp_mappings = utils.load_config().mappings.lspconfig
-  utils.load_mappings({ lsp_mappings }, { buffer = bufnr })
+  require("core.utils").load_mappings("lspconfig", { buffer = bufnr })
 
   if client.server_capabilities.signatureHelpProvider then
     require("nvchad_ui.signature").setup(client)
