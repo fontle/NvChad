@@ -22,7 +22,7 @@ M.load_config = function()
   if chadrc_exists then
     -- merge user config if it exists and is a table; otherwise display an error
     if type(chadrc) == "table" then
-      M.remove_default_keys()
+      M.remove_default_keys(chadrc.mappings or {})
       config = merge_tb("force", config, chadrc)
     else
       error "chadrc must return a table!"
@@ -33,9 +33,10 @@ M.load_config = function()
   return config
 end
 
-M.remove_default_keys = function()
-  local chadrc = require "custom.chadrc"
-  local user_mappings = chadrc.mappings or {}
+-- store mapping section names which have plugin key = true
+local lazyload_mappings_list = {}
+
+M.remove_default_keys = function(user_mappings)
   local user_keys = {}
   local user_sections = vim.tbl_keys(user_mappings)
 
@@ -55,7 +56,13 @@ M.remove_default_keys = function()
   local default_mappings = require("core.default_config").mappings
 
   -- remove user_maps from default mapping table
-  for _, section_mappings in pairs(default_mappings) do
+  for section_name, section_mappings in pairs(default_mappings) do
+    -- store mapping section name into a table
+    if section_mappings.plugin then
+      lazyload_mappings_list[section_name] = true
+      section_mappings.plugin = nil
+    end
+
     for mode, mode_mapping in pairs(section_mappings) do
       for keybind, _ in pairs(mode_mapping) do
         disable_key(mode, keybind, mode_mapping)
@@ -84,7 +91,10 @@ M.load_mappings = function(mappings, mapping_opt)
   mappings = mappings or vim.deepcopy(M.load_config().mappings)
   mappings.lspconfig = nil
 
-  for _, section in pairs(mappings) do
+  for name, section in pairs(mappings) do
+    -- skip mapping section with plugin=true
+    if not lazyload_mappings_list[name] then
+
     for mode, mode_values in pairs(section) do
       for keybind, mapping_info in pairs(mode_values) do
         -- merge default + user opts
@@ -97,6 +107,8 @@ M.load_mappings = function(mappings, mapping_opt)
 
         set_maps(keybind, mapping_info, opts)
       end
+    end
+
     end
   end
 end
