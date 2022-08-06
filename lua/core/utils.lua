@@ -94,21 +94,19 @@ M.load_mappings = function(mappings, mapping_opt)
   for name, section in pairs(mappings) do
     -- skip mapping section with plugin=true
     if not lazyload_mappings_list[name] then
+      for mode, mode_values in pairs(section) do
+        for keybind, mapping_info in pairs(mode_values) do
+          -- merge default + user opts
+          local default_opts = merge_tb("force", { mode = mode }, mapping_opt or {})
+          local opts = merge_tb("force", default_opts, mapping_info.opts or {})
 
-    for mode, mode_values in pairs(section) do
-      for keybind, mapping_info in pairs(mode_values) do
-        -- merge default + user opts
-        local default_opts = merge_tb("force", { mode = mode }, mapping_opt or {})
-        local opts = merge_tb("force", default_opts, mapping_info.opts or {})
+          if mapping_info.opts then
+            mapping_info.opts = nil
+          end
 
-        if mapping_info.opts then
-          mapping_info.opts = nil
+          set_maps(keybind, mapping_info, opts)
         end
-
-        set_maps(keybind, mapping_info, opts)
       end
-    end
-
     end
   end
 end
