@@ -46,9 +46,7 @@ M.remove_default_keys = function(user_mappings)
   end
 
   local function disable_key(mode, keybind, mode_mapping)
-    local keys_in_mode = vim.tbl_keys(user_keys[mode] or {})
-
-    if vim.tbl_contains(keys_in_mode, keybind) then
+    if user_keys[mode] and user_keys[mode][keybind] then
       mode_mapping[keybind] = nil
     end
   end

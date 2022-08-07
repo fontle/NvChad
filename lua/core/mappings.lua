@@ -132,6 +132,8 @@ M.comment = {
 }
 
 M.lspconfig = {
+  plugin = true,
+
   -- See `<cmd> :help vim.lsp.*` for documentation on any of the below functions
 
   n = {
